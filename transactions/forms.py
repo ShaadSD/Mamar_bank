@@ -1,5 +1,5 @@
 from django import forms 
-from .models import Transaction
+from .models import Transaction,Bankruft
 
 
 class TransactionForm(forms.ModelForm):
@@ -21,14 +21,21 @@ class TransactionForm(forms.ModelForm):
 
 class DepositForm(TransactionForm):
     def clean_amount(self):
-        min_deposit_amount = 100
-        amount=self.cleaned_data.get('amount')
-        if amount< min_deposit_amount:
-            raise forms.ValidationError(
-                f'You need to deposit at least {min_deposit_amount}$'
-            )
+        bankruft = Bankruft.objects.first()
+        
+        if bankruft and bankruft.is_bankruft:
+             raise forms.ValidationError(
+                f'the bank is bankrupt.'
+             )
+        else:
+            min_deposit_amount = 100
+            amount=self.cleaned_data.get('amount')
+            if amount< min_deposit_amount:
+                raise forms.ValidationError(
+                    f'You need to deposit at least {min_deposit_amount}$'
+                )
 
-        return amount
+            return amount
 
 class WithdrawForm(TransactionForm):
     def clean_amount(self):
@@ -37,21 +44,29 @@ class WithdrawForm(TransactionForm):
         max_withdraw_amount = 20000
         balance = account.balance
         amount = self.cleaned_data.get('amount')
-        if amount < min_withdraw_amount:
-            raise forms.ValidationError(
-                f'You can withdraw at least {min_withdraw_amount} $'
-            )
-        if amount > max_withdraw_amount:
-            raise froms.ValidationError(
-                f'You can withdraw at most {max_withdraw_amount} $'
-            )
-        if amount > balance:
-            raise forms.ValidationError(
-                f'You can {balance} $ in your account.'
-                'You can not withdraw more than your account balance'
-            )
+
+        bankruft = Bankruft.objects.first()
         
-        return amount
+        if bankruft and bankruft.is_bankruft:
+             raise forms.ValidationError(
+                f'the bank is bankrupt.'
+             )
+        else:
+            if amount < min_withdraw_amount:
+                raise forms.ValidationError(
+                    f'You can withdraw at least {min_withdraw_amount} $'
+                )
+            if amount > max_withdraw_amount:
+                raise froms.ValidationError(
+                    f'You can withdraw at most {max_withdraw_amount} $'
+                )
+            if amount > balance:
+                raise forms.ValidationError(
+                    f'You can {balance} $ in your account.'
+                    'You can not withdraw more than your account balance'
+                )
+            
+            return amount
 
 class LoanRequestForm(TransactionForm):
     def clean_amount(self):

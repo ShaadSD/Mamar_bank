@@ -11,6 +11,7 @@ from transactions.constants import DEPOSIT, WITHDRAWAL,LOAN, LOAN_PAID,TRANSFER
 from datetime import datetime
 from django.db.models import Sum
 from accounts.models import UserBankAccount
+from .models import Bankruft
 from django.core.mail import EmailMessage,EmailMultiAlternatives
 from django.template.loader import render_to_string
 from transactions.forms import (
@@ -93,6 +94,7 @@ class WithdrawMoneyView(TransactionCreateMixin):
     def form_valid(self, form):
         amount = form.cleaned_data.get('amount')
 
+        
         self.request.user.account.balance -= form.cleaned_data.get('amount')
         # balance = 300
         # amount = 5000
@@ -208,51 +210,51 @@ class TransferAmountView(TransactionCreateMixin):
     def get_initial(self):
         initial = super().get_initial()
         initial.update({
-            'transaction_type': TRANSFER  # Add a constant for transfer type
+            'transaction_type': TRANSFER 
         })
         return initial
 
     def form_valid(self, form):
         recipient_account_no = form.cleaned_data.get('recipient_account')
         amount = form.cleaned_data.get('amount')
-        sender_account = self.request.user.account  # Correct usage
+        sender_account = self.request.user.account 
 
-        # Try to find the recipient's account
+       
         try:
             recipient_account = UserBankAccount.objects.get(account_no=recipient_account_no)
         except UserBankAccount.DoesNotExist:
             messages.error(self.request, "Recipient account not found!")
-            return self.form_invalid(form)  # Show form with error
+            return self.form_invalid(form)  
 
-        # Check for sufficient balance
+       
         if sender_account.balance >= amount:
             sender_account.balance -= amount
             recipient_account.balance += amount
 
-            # Save the updated balances
+           
             sender_account.save()
             recipient_account.save()
 
-            # Create a transaction record for the sender
+           
             Transaction.objects.create(
                 account=sender_account,
-                amount=-amount,  # Negative amount for sender
-                balance_after_transaction=sender_account.balance,  # Update after deduction
+                amount=-amount,
+                balance_after_transaction=sender_account.balance, 
                 transaction_type=TRANSFER
             )
 
-            # Create a transaction record for the recipient
+            
             Transaction.objects.create(
                 account=recipient_account,
-                amount=amount,  # Positive amount for recipient
-                balance_after_transaction=recipient_account.balance,  # Update after addition
+                amount=amount,
+                balance_after_transaction=recipient_account.balance, 
                 transaction_type=TRANSFER
             )
 
             messages.success(self.request, "Amount transferred successfully!")
 
-            # Redirect to the success page or another page
-            return redirect('transfer')  # Replace 'success_page_name' with your URL name
+           
+            return redirect('transfer')  
         else:
             messages.error(self.request, "Insufficient balance!")
-            return self.form_invalid(form)  # Show form with error
+            return self.form_invalid(form) 

@@ -1,114 +1,48 @@
+{% extends 'base.html' %}
 
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transfer Money</title>
-    <style>
-        body {
-            /* Keep base styles intact, if any */
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: #fff; /* White background for form */
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            /* Optional: Add transparency if you want to see base background */
-            /* background-color: rgba(255, 255, 255, 0.9); */
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            margin: 10px 0 5px;
-            color: #555;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        input[type="number"] {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            width: 100%;
-        }
-
-        button {
-            padding: 10px;
-            font-size: 18px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        .messages {
-            margin-top: 20px;
-        }
-
-        .messages .success {
-            color: green;
-        }
-
-        .messages .error {
-            color: red;
-        }
-
-        .message-box {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-        }
-
-        .message-box.success {
-            background-color: #eaffea;
-            color: #4CAF50;
-        }
-
-        .message-box.error {
-            background-color: #ffebeb;
-            color: #e60000;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Transfer Money</h1>
-        <form method="post">
-            <!-- ফর্মের ইনপুট ফিল্ড গুলো দেখাবে -->
-            {{ form.as_p }}
-
-            <button type="submit">Transfer Money</button>
-        </form>
-
-        <!-- মেসেজ দেখানোর জন্য -->
-        <div class="messages">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="message-box {{ message.tags }}">{{ message }}</div>
+{% block content %}
+  {% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-2" role="alert">
+        <p class="font-bold">Error!</p>
+        <p class="block sm:inline">{{ error }}</p>
+      </div>
+    {% endfor %}
+  {% endif %}
+  
+  <div class="grid grid-cols-3 gap-4">
+    <div></div>
+    <div class="py- px-3 rounded-xl bg-white mt-12">
+      <h1 class="font-bold text-3xl text-center pb-5 shadow-md">Transfer Money</h1>
+      <div class="mb-4 appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+        <form method="post" class="shadow-md border border-gray-200 rounded px-8 pt-6 pb-8 mb-4">
+          {% csrf_token %}
+          {% for hidden_field in form.hidden_fields %}
+            {{ hidden_field.errors }}
+            {{ hidden_field }}
+          {% endfor %}
+          
+          {% for field in form.visible_fields %}
+            <div class="mb-4">
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id_for_label }}">
+                {{ field.label }}
+              </label>
+              {{ field }}
+              {% if field.errors %}
+                {% for error in field.errors %}
+                  <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
                 {% endfor %}
-            {% endif %}
-        </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <div class="flex items-center justify-center w-full">
+            <button class="bg-blue-900 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+              Transfer
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-</body>
-</html>
+  </div>
+{% endblock %}

@@ -14,3 +14,7 @@ class Transaction(models.Model):
     
     class Meta:
         ordering = ['timestamp'] 
+
+
+class Bankruft(models.Model):
+    is_bankruft=models.BooleanField(default=False)
