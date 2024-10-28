@@ -79,7 +79,7 @@ class DepositMoneyView(TransactionCreateMixin):
             f'{"{:,.2f}".format(float(amount))}$ was deposited to your account successfully'
         )
         send_transaction_email(self.request.user,amount,"Deposit Message",
-        "transactions/deposite.html")
+        "transactions/deposite_email.html")
         return super().form_valid(form)
 
 
@@ -250,7 +250,8 @@ class TransferAmountView(TransactionCreateMixin):
                 balance_after_transaction=recipient_account.balance, 
                 transaction_type=TRANSFER
             )
-
+            send_transaction_email(sender_account.user, amount, "Money Sent", "transactions/sent_email.html")
+            send_transaction_email(recipient_account.user, amount, "Money Received", "transactions/received_email.html")
             messages.success(self.request, "Amount transferred successfully!")
 
            

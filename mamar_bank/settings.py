@@ -107,12 +107,18 @@ WSGI_APPLICATION = 'mamar_bank.wsgi.application'
 
 # Replace the SQLite DATABASES configuration with PostgreSQL:
 # Replace the SQLite DATABASES configuration with PostgreSQL:
+# DATABASES = {
+#         'default': dj_database_url.config(      
+#         # Replace this value with your local database's connection string.        
+#             default='postgresql://mamarbank_0hls_user:GSQ6TwTQBk7LRJT8IaQ1hFgQxnaAeedS@dpg-csb7uqdumphs73b8f1a0-a.oregon-postgres.render.com/mamarbank_0hls',        
+#             ssl_require=True
+#         ) 
+# }
 DATABASES = {
-    'default': dj_database_url.config(      
-     # Replace this value with your local database's connection string.        
-    default='postgresql://mamarbank_0hls_user:GSQ6TwTQBk7LRJT8IaQ1hFgQxnaAeedS@dpg-csb7uqdumphs73b8f1a0-a.oregon-postgres.render.com/mamarbank_0hls',        
-    
-    ) 
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
